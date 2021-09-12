@@ -4,68 +4,40 @@
 #include <stdio.h>
 #include <string.h>
 
-//Use USART1 on PA2, PA3 for connection on main board
-#define EVAL_COM1                        USART1
-#define EVAL_COM1_CLK                    RCU_USART1
-
-#define EVAL_COM1_TX_PIN                 GPIO_PIN_2
-#define EVAL_COM1_RX_PIN                 GPIO_PIN_3
-
-#define EVAL_COM_GPIO_PORT               GPIOA
-#define EVAL_COM_GPIO_CLK                RCU_GPIOA
-#define EVAL_COM_AF                      GPIO_AF_1
-
-//Use USART1 on PA2, PA3 for connection on main board
-#define EVAL_COM1                        USART1
-#define EVAL_COM1_CLK                    RCU_USART1
-
-#define EVAL_COM1_TX_PIN                 GPIO_PIN_2
-#define EVAL_COM1_RX_PIN                 GPIO_PIN_3
-
-#define EVAL_COM_GPIO_PORT               GPIOA
-#define EVAL_COM_GPIO_CLK                RCU_GPIOA
-#define EVAL_COM_AF                      GPIO_AF_1
-
-void init_uart() {
-  rcu_periph_clock_enable(EVAL_COM_GPIO_CLK);
-  /* enable USART clock */
-  rcu_periph_clock_enable(EVAL_COM1_CLK);
-
-  /* connect port to USARTx_Tx */
-  gpio_af_set(EVAL_COM_GPIO_PORT, EVAL_COM_AF, EVAL_COM1_TX_PIN);
-
-  /* connect port to USARTx_Rx */
-  gpio_af_set(EVAL_COM_GPIO_PORT, EVAL_COM_AF, EVAL_COM1_RX_PIN);
-
-  /* configure USART Tx as alternate function push-pull */
-  gpio_mode_set(EVAL_COM_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                EVAL_COM1_TX_PIN);
-  gpio_output_options_set(EVAL_COM_GPIO_PORT, GPIO_OTYPE_PP,
-                          GPIO_OSPEED_10MHZ, EVAL_COM1_TX_PIN);
-
-  /* configure USART Rx as alternate function push-pull */
-  gpio_mode_set(EVAL_COM_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                EVAL_COM1_RX_PIN);
-  gpio_output_options_set(EVAL_COM_GPIO_PORT, GPIO_OTYPE_PP,
-                          GPIO_OSPEED_10MHZ, EVAL_COM1_RX_PIN);
-
+void initUART1() {
+  rcu_periph_clock_enable(RCU_GPIOA);
+  /* Enable USART clock */
+  rcu_periph_clock_enable(RCU_USART1);
+  /* Connect port to USARTx_Tx */
+  gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_2);
+  /* Connect port to USARTx_Rx */
+  gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_3);
+  /* Configure USART Tx as alternate function push-pull */
+  gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                GPIO_PIN_2);
+  gpio_output_options_set(GPIOA, GPIO_OTYPE_PP,
+                          GPIO_OSPEED_10MHZ, GPIO_PIN_2);
+  /* Configure USART Rx as alternate function push-pull */
+  gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                GPIO_PIN_3);
+  gpio_output_options_set(GPIOA, GPIO_OTYPE_PP,
+                          GPIO_OSPEED_10MHZ, GPIO_PIN_3);
   /* USART configure */
-  usart_deinit(EVAL_COM1);
-  /* 8N1 @ 115200 baud (standard) */
-  usart_baudrate_set(EVAL_COM1, 9600U);
-  usart_parity_config(EVAL_COM1, USART_PM_NONE);
-  usart_word_length_set(EVAL_COM1, USART_WL_8BIT);
-  usart_stop_bit_set(EVAL_COM1, USART_STB_1BIT);
-  usart_transmit_config(EVAL_COM1, USART_TRANSMIT_ENABLE);
-  usart_receive_config(EVAL_COM1, USART_RECEIVE_DISABLE);
-  usart_enable(EVAL_COM1);
+  usart_deinit(USART1);
+  usart_baudrate_set(USART1, 9600U);
+  usart_parity_config(USART1, USART_PM_NONE);
+  usart_word_length_set(USART1, USART_WL_8BIT);
+  usart_stop_bit_set(USART1, USART_STB_1BIT);
+  usart_transmit_config(USART1, USART_TRANSMIT_ENABLE);
+  usart_receive_config(USART1, USART_RECEIVE_DISABLE);
+  usart_enable(USART1);
 }
 
-void print_str(const char* str) {
+void printStrUSART1(const char* str) {
   for (size_t i = 0; i < strlen(str); i++) {
-    usart_data_transmit(EVAL_COM1, str[i]);
+    usart_data_transmit(USART1, str[i]);
     //wait for transmission buffer empty (TBE) before sending next data
-    while (RESET == usart_flag_get(EVAL_COM1, USART_FLAG_TBE)) {
+    while (RESET == usart_flag_get(USART1, USART_FLAG_TBE)) {
     }
   }
 }
@@ -95,37 +67,39 @@ void delay(uint32_t millis) {
   }
 }
 
+void printResetSource(void) {
+  printStrUSART1("Reset source: ");
+  if (rcu_flag_get(RCU_FLAG_V12RST)) printStrUSART1("V12 reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_OBLRST)) printStrUSART1("OBL reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_EPRST)) printStrUSART1("EPR reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_PORRST)) printStrUSART1("Power reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_SWRST)) printStrUSART1("SW reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_FWDGTRST)) printStrUSART1("FWDGT reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_WWDGTRST)) printStrUSART1("WWDGT reset\r\n");
+  if (rcu_flag_get(RCU_FLAG_LPRST)) printStrUSART1("LP reset\r\n");
+  rcu_all_reset_flag_clear();
+}
+
 int main(void) {
+  //Init system and systick
   SystemInit();
   systick_config();
 
+  //(Re)init free watchdog with lowest prescalar
   fwdgt_config(0x0fff, FWDGT_PSC_DIV4);
   fwdgt_enable();
 
-  // rcu_periph_clock_enable(RCU_GPIOA);
-  // gpio_mode_set(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_0);
-  // gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-  // GPIO_PIN_0);
-  // GPIO_OCTL(GPIOA) ^= GPIO_PIN_0;
+  initUART1();
+  printResetSource();
 
-  init_uart();
-
-  if (rcu_flag_get(RCU_FLAG_V12RST)) print_str("V12 reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_OBLRST)) print_str("OBL reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_EPRST)) print_str("EPR reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_PORRST)) print_str("Power reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_SWRST)) print_str("SW reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_FWDGTRST)) print_str("FWDGT reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_WWDGTRST)) print_str("WWDGT reset\r\n");
-  if (rcu_flag_get(RCU_FLAG_LPRST)) print_str("LP reset\r\n");
-  rcu_all_reset_flag_clear();
-
+  //So anyways, I started counting
   char buf[20];
   for (int i = 0; i < 10000; i++) {
     delay(1000);
     sprintf(buf, "%d\r\n", i);
-    print_str(buf);
-    fwdgt_counter_reload();
+    printStrUSART1(buf);
+    fwdgt_counter_reload(); //Don't forget to feed the watchdog
   }
+
   return 0;
 }
