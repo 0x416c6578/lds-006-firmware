@@ -9,7 +9,7 @@ This project uses the PlatformIO build system, with most of the setup taken from
 - Make sure you have the VSCode PlatformIO extension installed
 - To build, just run PlatformIO->Build
 
-## Installation
+## Uploading
 You need an ST-Link to flash the firmware. Connect the ST-Link to the debug header to the right of the GD32 CPU. The pinout is GND->CLK->DATA->3v3 (GND is the pad with the star shape that connects it to the ground plane **TODO: Add image**).
 ### OpenOCD
 - Start OpenOCD in the `.pio/build/GD32F130F6P6` directory
