@@ -37,6 +37,7 @@ You need an ST-Link to flash the firmware. Connect the ST-Link to the debug head
 ## High Level TODOs
 - [ ] Setup unused UART with an LED for some interaction and for debugging
 - [ ] Confirm that UART send and receive is working correctly
+- [ ] Setup preemptive RIOS (mainly for handling watchdog better)
 - [ ] Figure out how IR data is received and sent to the CPU
 - [ ] Parse data and send over serial
 - [ ] Figure out motor control
