@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/*
+Initialise UART1
+*/
 void initUART1() {
   rcu_periph_clock_enable(RCU_GPIOA);
   /* Enable USART clock */
@@ -33,6 +36,9 @@ void initUART1() {
   usart_enable(USART1);
 }
 
+/*
+Print a string over UART1
+*/
 void printStrUSART1(const char* str) {
   for (size_t i = 0; i < strlen(str); i++) {
     usart_data_transmit(USART1, str[i]);
@@ -43,30 +49,8 @@ void printStrUSART1(const char* str) {
 }
 
 /*
-Quick and dirty function for arbitrary time delay
-that will feed FWDGT automatically, assuming minimum
-prescalar value of /4
+Print last reset source
 */
-void delay(uint32_t millis) {
-  fwdgt_counter_reload();
-  uint32_t _millis = millis;
-  if (_millis < 200) {
-    delay_1ms(_millis);
-    return;
-  } else {
-    while (1) {
-      fwdgt_counter_reload();
-      if (_millis < 200) {
-        delay_1ms(_millis);
-        return;
-      } else {
-        delay_1ms(200);
-        _millis -= 200;
-      }
-    }
-  }
-}
-
 void printResetSource(void) {
   printStrUSART1("Reset source: ");
   if (rcu_flag_get(RCU_FLAG_V12RST)) printStrUSART1("V12 reset\r\n");
@@ -85,12 +69,12 @@ int main(void) {
   SystemInit();
   systick_config();
 
-  //(Re)init free watchdog with lowest prescalar
-  fwdgt_config(0x0fff, FWDGT_PSC_DIV4);
+  //(Re)init free watchdog with highest prescalar
+  fwdgt_config(0x0fff, FWDGT_PSC_DIV128);
   fwdgt_enable();
 
   initUART1();
-  printResetSource();
+  // printResetSource();
 
   //So anyways, I started counting
   char buf[20];
