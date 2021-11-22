@@ -5,6 +5,9 @@ Information about the module can be found [here](https://0x416c6578.github.io/ld
 
 This project uses the PlatformIO build system, with most of the setup taken from [this repo](https://github.com/maxgerhardt/pio-gd32f130c6) (huge thanks to the original developer, this saved a lot of headache). I made a custom configuration for the GD32F130F6P6, but most things stayed the similar to the original project.
 
+## Other Work
+User `opravdin` has done some nice work in finding the protocol and implementing a controller for the motor, see [here](https://github.com/opravdin/lds-006-reverse-engineering).
+
 ## Building
 - Make sure you have the VSCode PlatformIO extension installed
 - To build, just run PlatformIO->Build
